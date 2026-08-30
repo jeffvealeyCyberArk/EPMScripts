@@ -32,11 +32,11 @@ This PowerShell script identifies and removes duplicate endpoint agents from Idi
 Before running the script, gather the following information:
 
 
-| Item                | Description                   | Where to Find                                                              |
-| ------------------- | ----------------------------- | -------------------------------------------------------------------------- |
-| **Set ID**          | The GUID of your EPM Set      | EPM Console → Sets → Select Set → URL contains the Set ID                  |
-| **EPM Credentials** | Username and password for EPM | Your EPM administrator account                                             |
-| **EPM Server URL**  | Your EPM cloud environment    | Commercial: `login.epm.cyberark.com` US Gov: `login.epm.cyberarkgov.cloud` |
+| Item                         | Description                   | Where to Find                                                              |
+| ---------------------------- | ----------------------------- | -------------------------------------------------------------------------- |
+| **Set ID**                   | The GUID of your EPM Set      | EPM Console → Sets → Select Set → URL contains the Set ID                  |
+| **EPM Credentials**          | Username and password for EPM | Your EPM administrator account                                             |
+| **EPM Login Dispatcher URL** | Your EPM cloud environment    | Commercial: `login.epm.cyberark.com` US Gov: `login.epm.cyberarkgov.cloud` |
 
 
 
@@ -46,12 +46,12 @@ Before running the script, gather the following information:
 If using modern OAuth2 authentication via Idira Identity, you'll also need:
 
 
-| Item                   | Description                       | Where to Find                                                  |
-| ---------------------- | --------------------------------- | -------------------------------------------------------------- |
-| **Identity Subdomain** | Your Identity tenant subdomain    | From URL: `abc1234.id.cyberark.cloud` → subdomain is `abc1234` |
-| **OAuth App Alias**    | The alias of your EPM API web app | Identity Admin → Apps → Your EPM API App → Settings            |
-| **Service User**       | Dedicated service account         | Format: `svc-epm-api@yourtenant.cyberark.cloud`                |
-| **EPM Server Name**    | Your EPM server subdomain         | From URL: `mycompany.epm.cyberark.com` → name is `mycompany`   |
+| Item                   | Description                           | Where to Find                                                  |
+| ---------------------- | ------------------------------------- | -------------------------------------------------------------- |
+| **Identity Subdomain** | Your Identity tenant subdomain        | From URL: `abc1234.id.cyberark.cloud` → subdomain is `abc1234` |
+| **OAuth App Alias**    | The alias of your EPM API web app     | Identity Admin → Apps → Your EPM API App → Settings            |
+| **Service User**       | Dedicated service account             | Format: `svc-epm-api@yourtenant.cyberark.cloud`                |
+| **EPM Server Name**    | Your EPM server subdomain (ex: NAXXX) | From URL: `mycompany.epm.cyberark.com` → name is `mycompany`   |
 
 
 
@@ -298,7 +298,7 @@ Enter Application ID (optional, press Enter to skip):
 Authenticating via Legacy EPM authentication...
 EPM authentication successful!
 
-Connected to EPM server: https://mycompany.epm.cyberark.com
+Connected to EPM server: https://NAXXX.epm.cyberark.com
 
 Select API Version:
   [1] Legacy Computers API (deprecated, for older EPM versions)
@@ -453,7 +453,7 @@ If the script reports "No duplicates found" but you expect duplicates:
 1. Log into the EPM console
 2. Navigate to the Set you want to clean up
 3. Look at the URL - the Set ID is the GUID in the URL path
-  - Example: `https://mycompany.epm.cyberark.com/Sets/398a88e0-0276-4473-ba06-c986626029ae/...`
+  - Example: `https://naxxx.epm.cyberark.com/Sets/398a88e0-0276-4473-ba06-c986626029ae/...`
   - Set ID: `398a88e0-0276-4473-ba06-c986626029ae`
 
 ---
