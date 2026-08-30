@@ -59,7 +59,7 @@ If using modern OAuth2 authentication via CyberArk Identity, you'll also need:
 
 ### Step 1: Download the Script
 
-Save the script file `EPM-DeleteDuplicateEndpoints-Corp-Page.ps1` to a local folder, such as:
+Save the script file `EPM-DeleteDuplicateEndpoints.ps1` to a local folder, such as:
 ```
 C:\Users\YourName\Desktop\EPM Scripts\
 ```
@@ -75,7 +75,7 @@ C:\Users\YourName\Desktop\EPM Scripts\
 ### Step 3: Run the Script
 
 ```powershell
-.\EPM-DeleteDuplicateEndpoints-Corp-Page.ps1
+.\EPM-DeleteDuplicateEndpoints.ps1
 ```
 
 ---
