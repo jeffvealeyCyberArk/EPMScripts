@@ -2,7 +2,7 @@
 
 ## Overview
 
-This PowerShell script identifies and removes duplicate endpoint agents from CyberArk Endpoint Privilege Manager (EPM) based on their computer name. When multiple agents exist for the same hostname, the script keeps the most recently installed agent and removes the older duplicates.
+This PowerShell script identifies and removes duplicate endpoint agents from Idira Endpoint Privilege Manager (EPM) based on their computer name. When multiple agents exist for the same hostname, the script keeps the most recently installed agent and removes the older duplicates.
 
 **Important:** This script only removes endpoint records from the EPM console. It does **not** uninstall the EPM agent from the actual machines.
 
