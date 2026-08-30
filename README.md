@@ -21,28 +21,40 @@ This PowerShell script identifies and removes duplicate endpoint agents from Idi
 
 ---
 
+
+
 ## Prerequisites
+
+
 
 ### Required Information
 
 Before running the script, gather the following information:
 
-| Item | Description | Where to Find |
-|------|-------------|---------------|
-| **Set ID** | The GUID of your EPM Set | EPM Console → Sets → Select Set → URL contains the Set ID |
-| **EPM Credentials** | Username and password for EPM | Your EPM administrator account |
-| **EPM Server URL** | Your EPM cloud environment | Commercial: `login.epm.cyberark.com`<br>US Gov: `login.epm.cyberarkgov.cloud` |
+
+| Item                | Description                   | Where to Find                                                              |
+| ------------------- | ----------------------------- | -------------------------------------------------------------------------- |
+| **Set ID**          | The GUID of your EPM Set      | EPM Console → Sets → Select Set → URL contains the Set ID                  |
+| **EPM Credentials** | Username and password for EPM | Your EPM administrator account                                             |
+| **EPM Server URL**  | Your EPM cloud environment    | Commercial: `login.epm.cyberark.com` US Gov: `login.epm.cyberarkgov.cloud` |
+
+
+
 
 ### For OAuth2 Authentication (Optional)
 
-If using modern OAuth2 authentication via CyberArk Identity, you'll also need:
+If using modern OAuth2 authentication via Idira Identity, you'll also need:
 
-| Item | Description | Where to Find |
-|------|-------------|---------------|
-| **Identity Subdomain** | Your Identity tenant subdomain | From URL: `abc1234.id.cyberark.cloud` → subdomain is `abc1234` |
-| **OAuth App Alias** | The alias of your EPM API web app | Identity Admin → Apps → Your EPM API App → Settings |
-| **Service User** | Dedicated service account | Format: `svc-epm-api@yourtenant.cyberark.cloud` |
-| **EPM Server Name** | Your EPM server subdomain | From URL: `mycompany.epm.cyberark.com` → name is `mycompany` |
+
+| Item                   | Description                       | Where to Find                                                  |
+| ---------------------- | --------------------------------- | -------------------------------------------------------------- |
+| **Identity Subdomain** | Your Identity tenant subdomain    | From URL: `abc1234.id.cyberark.cloud` → subdomain is `abc1234` |
+| **OAuth App Alias**    | The alias of your EPM API web app | Identity Admin → Apps → Your EPM API App → Settings            |
+| **Service User**       | Dedicated service account         | Format: `svc-epm-api@yourtenant.cyberark.cloud`                |
+| **EPM Server Name**    | Your EPM server subdomain         | From URL: `mycompany.epm.cyberark.com` → name is `mycompany`   |
+
+
+
 
 ### System Requirements
 
@@ -54,22 +66,31 @@ If using modern OAuth2 authentication via CyberArk Identity, you'll also need:
 
 ---
 
+
+
 ## Getting Started
+
+
 
 ### Step 1: Download the Script
 
 Save the script file `EPM-DeleteDuplicateEndpoints.ps1` to a local folder, such as:
+
 ```
 C:\Users\YourName\Desktop\EPM Scripts\
 ```
+
+
 
 ### Step 2: Open PowerShell
 
 1. Press `Win + X` and select **Windows PowerShell** or **Terminal**
 2. Navigate to the script location:
-   ```powershell
+  ```powershell
    cd "C:\Users\YourName\Desktop\EPM Scripts\"
-   ```
+  ```
+
+
 
 ### Step 3: Run the Script
 
@@ -78,6 +99,8 @@ C:\Users\YourName\Desktop\EPM Scripts\
 ```
 
 ---
+
+
 
 ## Authentication Options
 
@@ -88,33 +111,40 @@ The script supports two authentication methods:
 Traditional username/password authentication directly with EPM.
 
 **When to use:**
+
 - Simple setup with no additional configuration required
-- Your organization hasn't migrated to CyberArk Identity
+- Your organization hasn't migrated to Idira Identity
 - Quick one-time script execution
 
 **Flow:**
+
 1. Select option `[1]` when prompted
 2. Choose your EPM cloud environment (Commercial, US Government, or Custom)
 3. Enter your EPM username
 4. Enter your EPM password (input is masked)
 5. Optionally enter an Application ID (or press Enter to skip)
 
-### Option 2: Modern OAuth2 via CyberArk Identity (ISPSS)
 
-OAuth 2.0 client credentials flow using CyberArk Identity Security Platform Shared Services.
+
+### Option 2: Modern OAuth2 via Idira Identity (ISPSS)
+
+OAuth 2.0 client credentials flow using IdiraIdentity Security Platform Shared Services.
 
 **When to use:**
-- Your organization uses CyberArk Identity for authentication
+
+- Your organization uses Idira Identity for authentication
 - You need token-based authentication for automation
 - Enhanced security requirements
 
 **Prerequisites for OAuth2:**
+
 1. A service user created in Identity Administration
 2. A custom EPM API web app configured in Identity
 3. The service user bound to the web app (in the Tokens tab)
 4. The service user assigned to an EPM role with API permissions
 
 **Flow:**
+
 1. Select option `[2]` when prompted
 2. Enter your Identity tenant subdomain
 3. Enter the OAuth app alias
@@ -124,6 +154,8 @@ OAuth 2.0 client credentials flow using CyberArk Identity Security Platform Shar
 
 ---
 
+
+
 ## API Version Selection
 
 After authentication, choose which EPM API to use:
@@ -131,24 +163,30 @@ After authentication, choose which EPM API to use:
 ### Option 1: Legacy Computers API
 
 **When to use:**
+
 - EPM version prior to 25.4
 - Your organization hasn't migrated to the new Endpoints page
 - Compatibility with older EPM deployments
 
 **Characteristics:**
+
 - Uses `GET /Sets/{SetId}/Computers` endpoint
 - Supports up to 2,500 records per page
 - Deletes one computer at a time
 - Property names: `ComputerName`, `AgentId`, `InstallTime`
 
+
+
 ### Option 2: Modern Endpoints API (Recommended)
 
 **When to use:**
+
 - EPM version 25.4 or later
 - Your organization has activated the new Endpoints management page
 - Better performance with batch deletions
 
 **Characteristics:**
+
 - Uses `POST /Sets/{SetId}/Endpoints/search` endpoint
 - Maximum 1,000 records per page
 - Batch deletion (up to 10 endpoints per API call)
@@ -156,13 +194,20 @@ After authentication, choose which EPM API to use:
 
 ---
 
+
+
 ## Understanding the Output
+
+
 
 ### Duplicate Detection
 
 The script identifies duplicates by grouping endpoints with the same hostname. For each group:
+
 - The endpoint with the **most recent install time** is **KEPT**
 - All older endpoints are marked for **DELETION**
+
+
 
 ### Sample Output
 
@@ -194,6 +239,8 @@ The EPM agent will NOT be uninstalled from the machines.
 Do you want to proceed with deletion? Type 'yes' to confirm:
 ```
 
+
+
 ### Deletion Progress
 
 During deletion, you'll see progress updates:
@@ -216,7 +263,11 @@ Processing batch 1 of 1 - Deleting 3 endpoint(s)...
 
 ---
 
+
+
 ## Step-by-Step Walkthrough
+
+
 
 ### Complete Example Using Legacy EPM Authentication + Modern Endpoints API
 
@@ -277,37 +328,53 @@ Starting deletion process...
 
 ---
 
+
+
 ## Troubleshooting
 
+
+
 ### Authentication Errors
+
+
 
 #### "EPM authentication failed"
 
 **Possible causes:**
+
 - Incorrect username or password
 - Account is locked or disabled
 - Wrong EPM cloud environment selected
 
 **Solutions:**
+
 1. Verify your credentials by logging into the EPM console manually
 2. Check if your account is locked in EPM Administration
 3. Ensure you selected the correct cloud environment (Commercial vs. US Government)
 
+
+
 #### "OAuth2 authentication failed"
 
 **Possible causes:**
+
 - Incorrect Identity subdomain
 - Wrong app alias
 - Service user not bound to the web app
 - Service user not assigned to an EPM role
 
 **Solutions:**
+
 1. Verify the Identity subdomain from your Identity console URL
 2. Check the app alias in Identity Admin → Apps → Your App → Settings
 3. Ensure the service user is bound in the app's Tokens tab
 4. Verify the service user has an EPM role with API permissions
 
+
+
 ### API Errors
+
+
 
 #### "Parameter limit must be between 1 and 1000"
 
@@ -316,14 +383,18 @@ This error occurs when using the Modern Endpoints API with an invalid page size.
 #### "Error retrieving endpoints/computers"
 
 **Possible causes:**
+
 - Invalid Set ID
 - Insufficient permissions
 - Network connectivity issues
 
 **Solutions:**
+
 1. Verify the Set ID is correct (copy from EPM console URL)
 2. Ensure your account has permission to view endpoints in this set
 3. Check network connectivity to EPM cloud services
+
+
 
 ### No Duplicates Found
 
@@ -335,7 +406,11 @@ If the script reports "No duplicates found" but you expect duplicates:
 
 ---
 
+
+
 ## FAQ
+
+
 
 ### Q: Will this uninstall the EPM agent from my computers?
 
@@ -352,8 +427,11 @@ If the script reports "No duplicates found" but you expect duplicates:
 ### Q: What happens if I have thousands of duplicates?
 
 **A:** The script handles large numbers efficiently:
+
 - **Legacy API:** Deletes one at a time with 6-second delays (API rate limit)
 - **Modern API:** Batch deletes up to 10 endpoints per API call with 6-second delays between batches
+
+
 
 ### Q: Is it safe to run this in production?
 
@@ -362,34 +440,46 @@ If the script reports "No duplicates found" but you expect duplicates:
 ### Q: Which API version should I use?
 
 **A:** 
+
 - Use **Modern Endpoints API** if your EPM version is 25.4 or later and you've activated the new Endpoints page
 - Use **Legacy Computers API** for older EPM versions or if you haven't migrated to the new endpoint management
+
+
 
 ### Q: How do I find my Set ID?
 
 **A:** 
+
 1. Log into the EPM console
 2. Navigate to the Set you want to clean up
 3. Look at the URL - the Set ID is the GUID in the URL path
-   - Example: `https://mycompany.epm.cyberark.com/Sets/398a88e0-0276-4473-ba06-c986626029ae/...`
-   - Set ID: `398a88e0-0276-4473-ba06-c986626029ae`
+  - Example: `https://mycompany.epm.cyberark.com/Sets/398a88e0-0276-4473-ba06-c986626029ae/...`
+  - Set ID: `398a88e0-0276-4473-ba06-c986626029ae`
 
 ---
+
+
 
 ## Support
 
 For issues with:
+
 - **This script:** Review the troubleshooting section above
-- **CyberArk EPM:** Contact CyberArk Support or consult the [EPM Documentation](https://docs.cyberark.com/epm/latest/en/content/home.htm)
-- **CyberArk Identity:** Consult the [Identity Documentation](https://docs.cyberark.com/identity/latest/en/content/home.htm)
+- **Idira EPM:** Contact CyberArk Support or consult the [EPM Documentation](https://docs.cyberark.com/epm/latest/en/content/resources/_topnav/cc_home.htm)
+- **Idira Identity:** Consult the [Manage](https://docs.cyberark.com/manage/latest/en/content/resources/_topnav/cc_home.htm) and [Setup](https://docs.cyberark.com/setup/latest/en/content/resources/_topnav/cc_home.htm) spaces
 
 ---
 
+
+
 ## Version History
 
-| Version | Date | Changes |
-|---------|------|---------|
-| 1.0 | Initial | Original script with Legacy Computers API |
-| 2.0 | Updated | Added Modern Endpoints API support |
-| 3.0 | Updated | Added OAuth2 authentication via CyberArk Identity |
-| 4.0 | Updated | Made script fully interactive with enhanced duplicate display |
+
+| Version | Date    | Changes                                                       |
+| ------- | ------- | ------------------------------------------------------------- |
+| 1.0     | Initial | Original script with Legacy Computers API                     |
+| 2.0     | Updated | Added Modern Endpoints API support                            |
+| 3.0     | Updated | Added OAuth2 authentication via CyberArk Identity             |
+| 4.0     | Updated | Made script fully interactive with enhanced duplicate display |
+
+
