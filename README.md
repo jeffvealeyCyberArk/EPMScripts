@@ -1,4 +1,3 @@
-@ -0,0 +1,395 @@
 # EPM Duplicate Endpoint Cleanup Script - Tutorial
 
 ## Overview
