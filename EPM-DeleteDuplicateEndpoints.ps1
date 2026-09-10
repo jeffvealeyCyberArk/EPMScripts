@@ -236,16 +236,54 @@ switch ($apiChoice) {
         Write-Host "Total computers retrieved: $($computersList.Count)" -ForegroundColor Gray
         Write-Host ""
         
-        # Find Duplicate Computers based on hostname
-        $duplicateComputers = $computersList | Group-Object -Property ComputerName | Where-Object { $_.Count -gt 1 } | Select-Object -ExpandProperty Group
+        # OPTIMIZED: Find Duplicate Computers using hashtable for O(1) lookups
+        # This is dramatically faster than Group-Object for large datasets
+        Write-Host "Analyzing duplicates..." -ForegroundColor Cyan
+        $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
         
-        # Group by Name and select all records older than the newest Install Date for each group
-        $result = @()
-        $duplicateComputers | Group-Object -Property ComputerName | ForEach-Object {
-            $newestDate = ($_.Group | Sort-Object -Property InstallTime -Descending | Select-Object -First 1).InstallTime
-            $olderRecords = $_.Group | Where-Object { [datetime]$_.InstallTime -lt [datetime]$newestDate }
-            $result += $olderRecords
+        # Build hashtable: key = ComputerName, value = ArrayList of computers with that name
+        $computersByName = @{}
+        $processedCount = 0
+        $totalCount = $computersList.Count
+        
+        foreach ($computer in $computersList) {
+            $name = $computer.ComputerName
+            if (-not $computersByName.ContainsKey($name)) {
+                $computersByName[$name] = [System.Collections.ArrayList]::new()
+            }
+            [void]$computersByName[$name].Add($computer)
+            
+            # Progress indicator every 10000 records
+            $processedCount++
+            if ($processedCount % 10000 -eq 0) {
+                Write-Host "  Processed $processedCount of $totalCount computers..." -ForegroundColor Gray
+            }
         }
+        
+        Write-Host "  Grouping complete. Found $($computersByName.Count) unique hostnames." -ForegroundColor Gray
+        
+        # Find duplicates and determine which to delete (keep newest, delete older)
+        $result = [System.Collections.ArrayList]::new()
+        $keptEndpoints = [System.Collections.ArrayList]::new()
+        $duplicateGroups = 0
+        
+        foreach ($name in $computersByName.Keys) {
+            $group = $computersByName[$name]
+            if ($group.Count -gt 1) {
+                $duplicateGroups++
+                # Sort by InstallTime descending, keep first (newest), delete rest
+                $sorted = $group | Sort-Object -Property { [datetime]$_.InstallTime } -Descending
+                [void]$keptEndpoints.Add($sorted[0])
+                for ($i = 1; $i -lt $sorted.Count; $i++) {
+                    [void]$result.Add($sorted[$i])
+                }
+            }
+        }
+        
+        $stopwatch.Stop()
+        Write-Host "  Analysis complete in $([math]::Round($stopwatch.Elapsed.TotalSeconds, 2)) seconds." -ForegroundColor Gray
+        Write-Host "  Found $duplicateGroups hostname(s) with duplicates, $($result.Count) total duplicate(s) to remove." -ForegroundColor Gray
+        Write-Host ""
         
         # Delete Duplicates using legacy API
         if ($result.Count -gt 0) {
@@ -262,19 +300,35 @@ switch ($apiChoice) {
             $separatorLine = "  {0,-30} {1,-40} {2,-25}" -f ("-" * 30), ("-" * 40), ("-" * 25)
             Write-Host $headerLine -ForegroundColor White
             Write-Host $separatorLine -ForegroundColor White
-            $result | ForEach-Object {
-                $dataLine = "  {0,-30} {1,-40} {2,-25}" -f $_.ComputerName, $_.AgentId, $_.InstallTime
+            
+            # Limit display to first 100 if there are many duplicates
+            $displayLimit = 100
+            $displayCount = 0
+            foreach ($computer in $result) {
+                if ($displayCount -ge $displayLimit) {
+                    Write-Host "  ... and $($result.Count - $displayLimit) more duplicates (display limited to $displayLimit)" -ForegroundColor Gray
+                    break
+                }
+                $dataLine = "  {0,-30} {1,-40} {2,-25}" -f $computer.ComputerName, $computer.AgentId, $computer.InstallTime
                 Write-Host $dataLine -ForegroundColor Gray
+                $displayCount++
             }
             
             # Show which endpoints will be KEPT (newest for each hostname)
             Write-Host ""
             Write-Host "The following endpoints will be KEPT (newest install per hostname):" -ForegroundColor Green
             Write-Host ""
-            $duplicateComputers | Group-Object -Property ComputerName | ForEach-Object {
-                $newest = $_.Group | Sort-Object -Property InstallTime -Descending | Select-Object -First 1
-                $keepLine = "  {0,-30} {1,-40} {2,-25}" -f $newest.ComputerName, $newest.AgentId, $newest.InstallTime
+            
+            # Limit display of kept endpoints too
+            $displayCount = 0
+            foreach ($kept in $keptEndpoints) {
+                if ($displayCount -ge $displayLimit) {
+                    Write-Host "  ... and $($keptEndpoints.Count - $displayLimit) more (display limited to $displayLimit)" -ForegroundColor Green
+                    break
+                }
+                $keepLine = "  {0,-30} {1,-40} {2,-25}" -f $kept.ComputerName, $kept.AgentId, $kept.InstallTime
                 Write-Host $keepLine -ForegroundColor Green
+                $displayCount++
             }
             
             Write-Host ""
@@ -383,16 +437,54 @@ switch ($apiChoice) {
         
         $endpointsDeleteURI = "$serverInstance/EPM/API/Sets/$setId/Endpoints/delete"
         
-        # Find Duplicate Endpoints based on hostname (using 'name' property from new API)
-        $duplicateEndpoints = $endpointsList | Group-Object -Property name | Where-Object { $_.Count -gt 1 } | Select-Object -ExpandProperty Group
+        # OPTIMIZED: Find Duplicate Endpoints using hashtable for O(1) lookups
+        # This is dramatically faster than Group-Object for large datasets
+        Write-Host "Analyzing duplicates..." -ForegroundColor Cyan
+        $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
         
-        # Group by name and select all records older than the newest Install Date for each group
-        $result = @()
-        $duplicateEndpoints | Group-Object -Property name | ForEach-Object {
-            $newestDate = ($_.Group | Sort-Object -Property installTime -Descending | Select-Object -First 1).installTime
-            $olderRecords = $_.Group | Where-Object { [datetime]$_.installTime -lt [datetime]$newestDate }
-            $result += $olderRecords
+        # Build hashtable: key = endpoint name, value = ArrayList of endpoints with that name
+        $endpointsByName = @{}
+        $processedCount = 0
+        $totalCount = $endpointsList.Count
+        
+        foreach ($endpoint in $endpointsList) {
+            $name = $endpoint.name
+            if (-not $endpointsByName.ContainsKey($name)) {
+                $endpointsByName[$name] = [System.Collections.ArrayList]::new()
+            }
+            [void]$endpointsByName[$name].Add($endpoint)
+            
+            # Progress indicator every 10000 records
+            $processedCount++
+            if ($processedCount % 10000 -eq 0) {
+                Write-Host "  Processed $processedCount of $totalCount endpoints..." -ForegroundColor Gray
+            }
         }
+        
+        Write-Host "  Grouping complete. Found $($endpointsByName.Count) unique hostnames." -ForegroundColor Gray
+        
+        # Find duplicates and determine which to delete (keep newest, delete older)
+        $result = [System.Collections.ArrayList]::new()
+        $keptEndpoints = [System.Collections.ArrayList]::new()
+        $duplicateGroups = 0
+        
+        foreach ($name in $endpointsByName.Keys) {
+            $group = $endpointsByName[$name]
+            if ($group.Count -gt 1) {
+                $duplicateGroups++
+                # Sort by installTime descending, keep first (newest), delete rest
+                $sorted = $group | Sort-Object -Property { [datetime]$_.installTime } -Descending
+                [void]$keptEndpoints.Add($sorted[0])
+                for ($i = 1; $i -lt $sorted.Count; $i++) {
+                    [void]$result.Add($sorted[$i])
+                }
+            }
+        }
+        
+        $stopwatch.Stop()
+        Write-Host "  Analysis complete in $([math]::Round($stopwatch.Elapsed.TotalSeconds, 2)) seconds." -ForegroundColor Gray
+        Write-Host "  Found $duplicateGroups hostname(s) with duplicates, $($result.Count) total duplicate(s) to remove." -ForegroundColor Gray
+        Write-Host ""
         
         # Delete Duplicate Endpoints using new Endpoints/delete API with batch processing
         if ($result.Count -gt 0) {
@@ -409,19 +501,35 @@ switch ($apiChoice) {
             $separatorLine = "  {0,-30} {1,-40} {2,-25}" -f ("-" * 30), ("-" * 40), ("-" * 25)
             Write-Host $headerLine -ForegroundColor White
             Write-Host $separatorLine -ForegroundColor White
-            $result | ForEach-Object {
-                $dataLine = "  {0,-30} {1,-40} {2,-25}" -f $_.name, $_.id, $_.installTime
+            
+            # Limit display to first 100 if there are many duplicates
+            $displayLimit = 100
+            $displayCount = 0
+            foreach ($endpoint in $result) {
+                if ($displayCount -ge $displayLimit) {
+                    Write-Host "  ... and $($result.Count - $displayLimit) more duplicates (display limited to $displayLimit)" -ForegroundColor Gray
+                    break
+                }
+                $dataLine = "  {0,-30} {1,-40} {2,-25}" -f $endpoint.name, $endpoint.id, $endpoint.installTime
                 Write-Host $dataLine -ForegroundColor Gray
+                $displayCount++
             }
             
             # Show which endpoints will be KEPT (newest for each hostname)
             Write-Host ""
             Write-Host "The following endpoints will be KEPT (newest install per hostname):" -ForegroundColor Green
             Write-Host ""
-            $duplicateEndpoints | Group-Object -Property name | ForEach-Object {
-                $newest = $_.Group | Sort-Object -Property installTime -Descending | Select-Object -First 1
-                $keepLine = "  {0,-30} {1,-40} {2,-25}" -f $newest.name, $newest.id, $newest.installTime
+            
+            # Limit display of kept endpoints too
+            $displayCount = 0
+            foreach ($kept in $keptEndpoints) {
+                if ($displayCount -ge $displayLimit) {
+                    Write-Host "  ... and $($keptEndpoints.Count - $displayLimit) more (display limited to $displayLimit)" -ForegroundColor Green
+                    break
+                }
+                $keepLine = "  {0,-30} {1,-40} {2,-25}" -f $kept.name, $kept.id, $kept.installTime
                 Write-Host $keepLine -ForegroundColor Green
+                $displayCount++
             }
             
             Write-Host ""
