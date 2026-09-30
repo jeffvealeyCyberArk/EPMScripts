@@ -1,6 +1,6 @@
-# CyberArk EPM SSL Inspection Tester
+# Idira EPM SSL Inspection Tester
 
-A PowerShell script to detect SSL/TLS inspection on CyberArk Endpoint Privilege Manager (EPM) service URLs. This tool helps identify if your organization's proxy or firewall is performing SSL decryption on EPM traffic, which can cause agent communication issues.
+A PowerShell script to detect SSL/TLS inspection on Idira Endpoint Privilege Manager (EPM) service URLs. This tool helps identify if your organization's proxy or firewall is performing SSL decryption on EPM traffic, which can cause agent communication issues.
 
 ## 📋 Table of Contents
 
@@ -18,7 +18,7 @@ A PowerShell script to detect SSL/TLS inspection on CyberArk Endpoint Privilege 
 
 ## Overview
 
-The EPM SSL Inspection Tester checks SSL certificates for CyberArk EPM service URLs and reports:
+The EPM SSL Inspection Tester checks SSL certificates for Idira EPM service URLs and reports:
 
 - **Certificate Subject** - Who the certificate was issued to
 - **Certificate Issuer** - The Certificate Authority (CA) that signed the certificate
@@ -27,11 +27,12 @@ The EPM SSL Inspection Tester checks SSL certificates for CyberArk EPM service U
 
 ## Why SSL Inspection Matters
 
-CyberArk EPM requires secure, unmodified TLS connections between endpoints and the EPM cloud service. According to [CyberArk's documentation](https://docs.cyberark.com/epm/latest/en/content/installation/network-setup.htm):
+Idira EPM requires secure, unmodified TLS connections between endpoints and the EPM cloud service. According to [Idira's documentation](https://docs.cyberark.com/epm/latest/en/content/installation/network-setup.htm):
 
 > Bypass SSL inspection for destinations used by the new endpoint management service, including the EPM service URLs. Do not terminate or re-sign the TLS session used for endpoint management service communication.
 
 If SSL inspection is occurring, you may experience:
+
 - Agent registration failures
 - Policy update issues
 - Real-time communication problems
@@ -50,7 +51,7 @@ If you see a different issuer (e.g., your organization's internal CA, Palo Alto 
 ## Prerequisites
 
 - **Windows PowerShell 5.1** or **PowerShell 7+**
-- Network access to CyberArk EPM URLs (port 443)
+- Network access to Idira EPM URLs (port 443)
 - No special permissions required
 
 ## Installation
@@ -83,7 +84,7 @@ You'll see the main menu:
 
 ```
   ╔════════════════════════════════════════════════════════════╗
-  ║           CyberArk EPM SSL Inspection Tester               ║
+  ║            Idira EPM SSL Inspection Tester                 ║
   ╠════════════════════════════════════════════════════════════╣
   ║  This tool checks SSL certificates for EPM service URLs    ║
   ║  to detect if SSL inspection/decryption is occurring.      ║
@@ -181,7 +182,7 @@ For automation or scripting, specify the region directly:
 --------------------------------------------------
 URL:            https://NA123.epm.cyberark.com
 Type:           Tenant
-Subject:        CN=epm.cyberark.com, O="CyberArk Software Ltd.", L=Petah Tikva, C=IL
+Subject:        CN=epm.cyberark.com, O="Idira Software Ltd.", L=Petah Tikva, C=IL
 Issuer:         CN=Cloudflare Inc ECC CA-3, O="Cloudflare, Inc.", C=US
 Expires:        2025-07-15 23:59:59
 SSL Inspection: Not Detected
@@ -273,8 +274,8 @@ Unblock-File -Path .\Test-EPM-SSLInspection.ps1
 
 ## References
 
-- [CyberArk EPM Network Setup Documentation](https://docs.cyberark.com/epm/latest/en/content/installation/network-setup.htm)
-- [CyberArk EPM Service URLs by Region](https://docs.cyberark.com/epm/latest/en/content/installation/network-setup.htm#ServiceURLsforaspecificregion)
+- [Idira EPM Network Setup Documentation](https://docs.cyberark.com/epm/latest/en/content/installation/network-setup.htm)
+- [Idira EPM Service URLs by Region](https://docs.cyberark.com/epm/latest/en/content/installation/network-setup.htm#ServiceURLsforaspecificregion)
 - [Required Root Certificates for EPM](https://docs.cyberark.com/epm/latest/en/content/installation/network-setup.htm#Networkprerequisites)
 
 ## License

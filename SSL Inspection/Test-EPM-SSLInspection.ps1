@@ -1,13 +1,13 @@
 ﻿<#
 .SYNOPSIS
-    Tests SSL/TLS certificates for CyberArk EPM service URLs to detect SSL inspection.
+    Tests SSL/TLS certificates for Idira EPM service URLs to detect SSL inspection.
 
 .DESCRIPTION
-    This script checks SSL certificates for CyberArk EPM service URLs across different regions.
+    This script checks SSL certificates for Idira EPM service URLs across different regions.
     It retrieves and displays the Subject and Issuer of each certificate to help identify
     if SSL inspection is being performed by a proxy or firewall.
 
-    Expected issuers for legitimate CyberArk EPM certificates:
+    Expected issuers for legitimate Idira EPM certificates:
     - Tenant URLs: Cloudflare Inc (via Google Trust Services or similar)
     - S3 URLs: Amazon (via Amazon Trust Services)
     - Agent URLs: Amazon (via Amazon Trust Services)
@@ -415,7 +415,7 @@ function Test-SSLCertificate {
             }
 
             # Detect SSL inspection based on issuer
-            # Expected issuers for CyberArk EPM:
+            # Expected issuers for Idira EPM:
             # - Cloudflare, Google Trust Services for tenant URLs
             # - Amazon for S3 and agent URLs
             $knownIssuers = @(
@@ -478,7 +478,7 @@ function Show-RegionMenu {
 
     Write-Host ""
     Write-Host "  ╔════════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
-    Write-Host "  ║           CyberArk EPM SSL Inspection Tester               ║" -ForegroundColor Cyan
+    Write-Host "  ║            Idira EPM SSL Inspection Tester                 ║" -ForegroundColor Cyan
     Write-Host "  ╠════════════════════════════════════════════════════════════╣" -ForegroundColor Cyan
     Write-Host "  ║  This tool checks SSL certificates for EPM service URLs    ║" -ForegroundColor Cyan
     Write-Host "  ║  to detect if SSL inspection/decryption is occurring.      ║" -ForegroundColor Cyan
@@ -779,7 +779,7 @@ function Format-Results {
             Write-Host "SSL Inspection: " -NoNewline -ForegroundColor White
             if ($result.SSLInspection -eq "LIKELY DETECTED") {
                 Write-Host $result.SSLInspection -ForegroundColor Red
-                Write-Host "                WARNING: Certificate issuer does not match expected CyberArk/Amazon/Cloudflare CA." -ForegroundColor Yellow
+                Write-Host "                WARNING: Certificate issuer does not match expected Idira/Amazon/Cloudflare CA." -ForegroundColor Yellow
                 Write-Host "                This may indicate SSL inspection is occurring." -ForegroundColor Yellow
             } else {
                 Write-Host $result.SSLInspection -ForegroundColor Green
@@ -819,13 +819,13 @@ function Format-Results {
 # Display banner
 Write-Host @"
 
- ██████╗██╗   ██╗██████╗ ███████╗██████╗  █████╗ ██████╗ ██╗  ██╗
-██╔════╝╚██╗ ██╔╝██╔══██╗██╔════╝██╔══██╗██╔══██╗██╔══██╗██║ ██╔╝
-██║      ╚████╔╝ ██████╔╝█████╗  ██████╔╝███████║██████╔╝█████╔╝ 
-██║       ╚██╔╝  ██╔══██╗██╔══╝  ██╔══██╗██╔══██║██╔══██╗██╔═██╗ 
-╚██████╗   ██║   ██████╔╝███████╗██║  ██║██║  ██║██║  ██║██║  ██╗
- ╚═════╝   ╚═╝   ╚═════╝ ╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝
-                    EPM SSL Inspection Tester
+██╗██████╗ ██╗██████╗  █████╗ 
+██║██╔══██╗██║██╔══██╗██╔══██╗
+██║██║  ██║██║██████╔╝███████║
+██║██║  ██║██║██╔══██╗██╔══██║
+██║██████╔╝██║██║  ██║██║  ██║
+╚═╝╚═════╝ ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝
+      EPM SSL Inspection Tester
 "@ -ForegroundColor Cyan
 
 # Interactive loop - keep running until user exits
@@ -902,7 +902,7 @@ while ($continueRunning) {
     if ($continueChoice -ne "Y" -and $continueChoice -ne "y") {
         $continueRunning = $false
         Write-Host ""
-        Write-Host "  Thank you for using the EPM SSL Inspection Tester!" -ForegroundColor Cyan
+        Write-Host "  Thank you for using the Idira EPM SSL Inspection Tester!" -ForegroundColor Cyan
         Write-Host "  Reference: https://docs.cyberark.com/epm/latest/en/content/installation/network-setup.htm" -ForegroundColor Gray
         Write-Host ""
     }
