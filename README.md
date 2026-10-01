@@ -10,6 +10,7 @@ This repository contains PowerShell utilities for administering **CyberArk Endpo
 EPMScripts/
 ├── Delete Duplicate Endpoints/
 ├── Delete Stale Endpoints/
+├── SSL Inspection/
 └── .gitignore
 ```
 
@@ -17,6 +18,7 @@ EPMScripts/
 |---|---|
 | [`Delete Duplicate Endpoints`](./Delete%20Duplicate%20Endpoints) | Identifies and removes duplicate endpoint agent entries from an EPM Set. See the script/README inside this folder for setup and usage details. |
 | [`Delete Stale Endpoints`](./Delete%20Stale%20Endpoints) | Identifies and removes endpoint agents that haven't connected (or been installed) within a configurable number of days. Supports both the legacy Computers API and the modern Endpoints API, and both legacy and OAuth2 (CyberArk Identity/ISPSS) authentication. See the script/README inside this folder for setup and usage details. |
+| [`SSL Inspection`](./SSL%20Inspection) | Tests SSL/TLS certificates for CyberArk EPM service URLs to detect if SSL inspection/decryption is occurring. Helps identify proxy or firewall configurations that may cause agent communication issues. Supports all EPM regions and can test by region or specific tenant server. See the script/README inside this folder for setup and usage details. |
 
 > Each folder is self-contained — open it for the script itself and any folder-specific documentation before running anything against a production EPM tenant.
 
@@ -46,11 +48,13 @@ EPMScripts/
 
 ## ⚠️ Safety notes
 
-These scripts perform **destructive operations** (deleting endpoint entries from EPM). Before running any script in this repo against a production Set:
+Some scripts in this repo perform **destructive operations** (deleting endpoint entries from EPM). Before running any delete script against a production Set:
 
 - Review the preview/confirmation output the script shows before it deletes anything.
 - Test against a non-production Set first, if one is available.
 - Confirm you understand what "delete" means for that specific script (e.g., deleting an endpoint entry from EPM does **not** uninstall the agent from the machine).
+
+> **Note:** The SSL Inspection script is read-only and does not modify any EPM data — it only tests SSL certificates to detect inspection.
 
 ## Disclaimer
 
