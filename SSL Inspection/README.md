@@ -1,6 +1,10 @@
 # Idira EPM SSL Inspection Tester
 
-A PowerShell script to detect SSL/TLS inspection on Idira Endpoint Privilege Manager (EPM) service URLs. This tool helps identify if your organization's proxy or firewall is performing SSL decryption on EPM traffic, which can cause agent communication issues.
+Scripts to detect SSL/TLS inspection on Idira Endpoint Privilege Manager (EPM) service URLs. This tool helps identify if your organization's proxy or firewall is performing SSL decryption on EPM traffic, which can cause agent communication issues.
+
+**Available Scripts:**
+- `Test-EPM-SSLInspection.ps1` — PowerShell script for Windows
+- `Test-EPM-SSLInspection.sh` — Bash script for macOS/Linux
 
 ## 📋 Table of Contents
 
@@ -50,24 +54,49 @@ If you see a different issuer (e.g., your organization's internal CA, Palo Alto 
 
 ## Prerequisites
 
+### Windows (PowerShell)
 - **Windows PowerShell 5.1** or **PowerShell 7+**
+- Network access to Idira EPM URLs (port 443)
+- No special permissions required
+
+### macOS/Linux (Bash)
+- **Bash** shell
+- **curl** (pre-installed on most systems)
 - Network access to Idira EPM URLs (port 443)
 - No special permissions required
 
 ## Installation
 
+### Windows (PowerShell)
+
 1. Download the script:
    ```powershell
    # Clone the repository
-   git clone https://github.com/yourusername/EPMScripts.git
+   git clone https://github.com/jeffvealeyCyberArk/EPMScripts.git
    
    # Or download just the script
-   Invoke-WebRequest -Uri "https://raw.githubusercontent.com/yourusername/EPMScripts/main/SSL%20Inspection/Test-EPM-SSLInspection.ps1" -OutFile "Test-EPM-SSLInspection.ps1"
+   Invoke-WebRequest -Uri "https://raw.githubusercontent.com/jeffvealeyCyberArk/EPMScripts/main/SSL%20Inspection/Test-EPM-SSLInspection.ps1" -OutFile "Test-EPM-SSLInspection.ps1"
    ```
 
 2. Unblock the script (if downloaded from the internet):
    ```powershell
    Unblock-File -Path ".\Test-EPM-SSLInspection.ps1"
+   ```
+
+### macOS/Linux (Bash)
+
+1. Download the script:
+   ```bash
+   # Clone the repository
+   git clone https://github.com/jeffvealeyCyberArk/EPMScripts.git
+   
+   # Or download just the script
+   curl -O https://raw.githubusercontent.com/jeffvealeyCyberArk/EPMScripts/main/SSL%20Inspection/Test-EPM-SSLInspection.sh
+   ```
+
+2. Make the script executable:
+   ```bash
+   chmod +x Test-EPM-SSLInspection.sh
    ```
 
 ## Usage
@@ -76,8 +105,14 @@ If you see a different issuer (e.g., your organization's internal CA, Palo Alto 
 
 Simply run the script without parameters for a guided experience:
 
+**Windows (PowerShell):**
 ```powershell
 .\Test-EPM-SSLInspection.ps1
+```
+
+**macOS/Linux (Bash):**
+```bash
+./Test-EPM-SSLInspection.sh
 ```
 
 You'll see the main menu:
@@ -153,12 +188,20 @@ This will test:
 
 For automation or scripting, specify the region directly:
 
+**Windows (PowerShell):**
 ```powershell
 # Test a specific region
 .\Test-EPM-SSLInspection.ps1 -Region NA
 
 # Test EU region
 .\Test-EPM-SSLInspection.ps1 -Region EU
+```
+
+**macOS/Linux (Bash):**
+
+The bash script runs interactively. Simply launch it and select your region or enter a specific server name when prompted:
+```bash
+./Test-EPM-SSLInspection.sh
 ```
 
 ## Understanding the Results
@@ -262,6 +305,8 @@ If you see connection errors:
 
 ### Script Execution Policy
 
+**Windows (PowerShell):**
+
 If you receive an execution policy error:
 
 ```powershell
@@ -270,6 +315,18 @@ powershell -ExecutionPolicy Bypass -File .\Test-EPM-SSLInspection.ps1
 
 # Option 2: Unblock the specific file
 Unblock-File -Path .\Test-EPM-SSLInspection.ps1
+```
+
+**macOS/Linux (Bash):**
+
+If you receive a permission denied error:
+
+```bash
+# Make the script executable
+chmod +x Test-EPM-SSLInspection.sh
+
+# Then run it
+./Test-EPM-SSLInspection.sh
 ```
 
 ## References

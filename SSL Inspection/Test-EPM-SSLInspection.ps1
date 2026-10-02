@@ -262,10 +262,6 @@ $EPMRegions = @{
         Name = "USA"
         TenantURLs = @(
             "https://login.epm.cyberark.com"
-            "https://dispatcher1.epm.cyberark.com"
-            "https://SVC107.epm.cyberark.com"
-            "https://SVC108.epm.cyberark.com"
-            "https://NA105.epm.cyberark.com"
             "https://NA109.epm.cyberark.com"
             "https://NA110.epm.cyberark.com"
             "https://NA111.epm.cyberark.com"
@@ -347,9 +343,15 @@ $EPMRegions = @{
         )
     }
     "FED" = @{
-        Name = "Federal (US Gov)"
+        Name = "US FedRAMP"
         TenantURLs = @(
             "https://login.epm.cyberarkgov.cloud"
+            "https://NA01.epm.cyberarkgov.cloud"
+            "https://NA02.epm.cyberarkgov.cloud"
+            "https://NA03.epm.cyberarkgov.cloud"
+            "https://NA04.epm.cyberarkgov.cloud"
+            "https://NA05.epm.cyberarkgov.cloud"
+            "https://NA06.epm.cyberarkgov.cloud"
         )
         S3URLs = @(
             "https://epm-epmprod-us-gov-west-1-epm-downloads.s3-us-gov-west-1.amazonaws.com"
@@ -568,10 +570,11 @@ function Show-SpecificServerPrompt {
     Write-Host ""
     Write-Host "  Format: " -NoNewline -ForegroundColor Gray
     Write-Host "<Region><Number>" -ForegroundColor Cyan
-    Write-Host "  Examples: NA123, EU140, AU126, UK149, SVC107, SVC8" -ForegroundColor Gray
+    Write-Host "  Examples: NA123, EU140, AU126, UK149, NA01 (FedRAMP)" -ForegroundColor Gray
     Write-Host ""
     Write-Host "  Valid region prefixes:" -ForegroundColor Gray
     Write-Host "    NA, EU, AU, BR, CA, CH, IL, IN, IT, JP, SG, UK, SVC" -ForegroundColor DarkGray
+    Write-Host "    FedRAMP: NA01-NA06" -ForegroundColor DarkGray
     Write-Host ""
     Write-Host "  ────────────────────────────────────────────────────────────" -ForegroundColor DarkGray
     
@@ -579,12 +582,12 @@ function Show-SpecificServerPrompt {
         $serverInput = Read-Host "  Enter server name"
         $serverInput = $serverInput.Trim().ToUpper()
         
-        # Validate server format (letters followed by numbers, or special cases)
-        if ($serverInput -match '^(NA|EU|AU|BR|CA|CH|IL|IN|IT|JP|SG|UK|SVC)\d+$') {
+        # Validate server format (letters followed by numbers, or special cases including FedRAMP NA01-NA06)
+        if ($serverInput -match '^NA0[1-6]$' -or $serverInput -match '^(NA|EU|AU|BR|CA|CH|IL|IN|IT|JP|SG|UK|SVC)\d+$') {
             return @{ Type = "Server"; Value = $serverInput }
         }
         
-        Write-Host "  Invalid server format. Please enter a valid server name (e.g., NA123, EU140)." -ForegroundColor Red
+        Write-Host "  Invalid server format. Please enter a valid server name (e.g., NA123, EU140, NA01)." -ForegroundColor Red
     } while ($true)
 }
 
@@ -598,8 +601,12 @@ function Get-RegionFromServer {
         [string]$ServerName
     )
     
+    # Check for FedRAMP servers first (NA01-NA06)
+    if ($ServerName -match '^NA0[1-6]$') {
+        return "FED"
+    }
     # Extract the prefix from the server name
-    if ($ServerName -match '^(NA|SVC)\d+$') {
+    elseif ($ServerName -match '^(NA|SVC)\d+$') {
         return "NA"
     } elseif ($ServerName -match '^EU\d+$') {
         return "EU"
@@ -653,8 +660,12 @@ function Test-SpecificServer {
     Write-Host "  Region: $($region.Name) ($regionCode)" -ForegroundColor Cyan
     Write-Host "================================================" -ForegroundColor Cyan
     
-    # Build the tenant URL for the specific server
-    $tenantUrl = "https://$ServerName.epm.cyberark.com"
+    # Build the tenant URL for the specific server (FedRAMP uses different domain)
+    if ($regionCode -eq "FED") {
+        $tenantUrl = "https://$ServerName.epm.cyberarkgov.cloud"
+    } else {
+        $tenantUrl = "https://$ServerName.epm.cyberark.com"
+    }
     
     # Test the specific tenant URL
     Write-Host "`n[Tenant URL - Specific Server]" -ForegroundColor Yellow
@@ -662,7 +673,11 @@ function Test-SpecificServer {
     
     # Also test the regional login URL
     Write-Host "`n[Regional Login URL]" -ForegroundColor Yellow
-    $regionalLoginUrl = $region.TenantURLs | Where-Object { $_ -notmatch '\d+\.epm\.cyberark' } | Select-Object -First 1
+    if ($regionCode -eq "FED") {
+        $regionalLoginUrl = "https://login.epm.cyberarkgov.cloud"
+    } else {
+        $regionalLoginUrl = $region.TenantURLs | Where-Object { $_ -notmatch '\d+\.epm\.cyberark' } | Select-Object -First 1
+    }
     if ($regionalLoginUrl) {
         $results += Test-SSLCertificate -Uri $regionalLoginUrl -UrlType "Tenant (Regional)"
     }
